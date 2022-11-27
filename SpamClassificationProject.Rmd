@@ -1,22 +1,16 @@
 ---
-title: "Math 189 Final Project"
-author: "Vincent Tu (A15484541), Luis Mancilla (A16027554), Abirami Sabbani (A15487509)"
-date: "3/9/2022"
-output:
-  html_document:
-    df_print: paged
+title: "Spam Classification"
+author: "Abirami Sabbani"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
 ```{r}
 library(tidyverse)
 library(latex2exp) 
 library(ggforce) 
-#library(e1071)
 library(scales)
 library(matrixStats)
 library(caret)
@@ -124,7 +118,6 @@ boxplot(log_train)
 boxplot(log_test)
 ```
 
-
 **Visualization for discretized train and test data**
 
 ```{r}
@@ -134,9 +127,7 @@ boxplot(I_train)
 boxplot(I_test)
 ```
 
-
 Since the train and test datasets have a different amount of data, the scale is different but the ratios are about the same. We also noticed that for the log transformation feature shows a high variance for features 56 and 57, but it is not as noticeable when we standardized the feature.
-
 
 ```{r}
 stan_train = as.data.frame(stan_train)
@@ -144,13 +135,11 @@ log_train = as.data.frame(log_train)
 I_train = as.data.frame(I_train)
 ```
 
-
 ```{r}
 stan_train$V58 <- train$V58
 log_train$V58 <- train$V58
 I_train$V58 <- train$V58
 ```
-
 
 
 ```{r}
@@ -169,10 +158,6 @@ stan_train$V58 <- train$V58
 log_train$V58 <- train$V58
 I_train$V58 <- train$V58
 ```
-
-
-
-
 
 
 3b)
