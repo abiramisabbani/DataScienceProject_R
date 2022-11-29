@@ -4,7 +4,6 @@ author: "Abirami Sabbani"
 date: "3/9/2022"
 ---
 
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -14,7 +13,6 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(latex2exp) 
 library(ggforce) 
-#library(e1071)
 library(scales)
 library(matrixStats)
 library(caret)
