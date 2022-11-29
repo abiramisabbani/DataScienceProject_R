@@ -2,9 +2,6 @@
 title: "Spam Classification"
 author: "Abirami Sabbani"
 date: "3/9/2022"
-output:
-  html_document:
-    df_print: paged
 ---
 
 
@@ -28,12 +25,11 @@ library(MASS)
 1) Standardized the columns so that they all have zero mean and unit variance.
 
 ```{r}
-train = read.csv('spam-train.txt', header = FALSE)
+train = read.csv('train.txt', header = FALSE)
 ```
 
-
 ```{r}
-test = read.csv('spam-test.txt', header = FALSE)
+test = read.csv('test.txt', header = FALSE)
 ```
 
 ```{r}
@@ -45,7 +41,7 @@ colMeans(stan_train)
 ```
 
 ```{r}
-colVars(as.matrix(stan_train))
+colVars(matrix(stan_train))
 ```
 
 
@@ -66,7 +62,7 @@ colVars(stan_test)
 
 
 
-2) Transformed the features using log(xij + 1).
+2) Transformed the features.
 
 ```{r}
 log_train = log(train + 1)
@@ -80,7 +76,7 @@ head(log_test)
 
 
 
-3) Discretized each feature using I(xij > 0). 
+3) Discretized each feature.
 
 ```{r}
 I_train = (train > 0 ) * 1
@@ -132,13 +128,13 @@ boxplot(I_test)
 ```
 
 
-Since the train and test datasets have a different amount of data, the scale is different but the ratios are about the same. Also the log transformation feature shows a high variance for features 56 and 57, but it is not as noticeable when the feature is standardized.
+Since the train and test datasets have a different amount of data, the scale is different but the ratios are about the same.
 
 
 ```{r}
-stan_train = as.data.frame(stan_train)
-log_train = as.data.frame(log_train)
-I_train = as.data.frame(I_train)
+stan_train = data.frame(stan_train)
+log_train = data.frame(log_train)
+I_train = data.frame(I_train)
 ```
 
 
@@ -151,10 +147,10 @@ I_train$V58 <- train$V58
 
 
 ```{r}
-test = as.data.frame(test)
-stan_test = as.data.frame(stan_test)
-log_test = as.data.frame(log_test)
-I_test = as.data.frame(I_test)
+test = data.frame(test)
+stan_test = data.frame(stan_test)
+log_test = data.frame(log_test)
+I_test = data.frame(I_test)
 ```
 
 
@@ -171,16 +167,16 @@ I_train$V58 <- train$V58
 **Linear Regression on original train and test data**
 
 ```{r}
-train = as.data.frame(train)
+train = data.frame(train)
 ```
 
 ```{r}
-test = as.data.frame(test)
+test = data.frame(test)
 ```
 
 
 ```{r}
-lr_train <- glm(V58 ~ ., data = train, family = "binomial")
+lr_train <- glm(data = train, family = "binomial")
 summary(lr_train)
 ```
 From the summary, the result indicates that features: 4,5, 7, 8, 9, 11, 16, 17, 19, 20, 21, 23, 25, 27, 42, 44, 45, 46, 47, 49, 52, 52, 55, 56,
@@ -192,14 +188,14 @@ pred_test <- (predict(lr_train, test) > 0) * 1
 ```
 
 ```{r}
-cm_lr_train = confusionMatrix(as.factor(pred_train), as.factor(train$V58), positive = "1")
+cm_lr_train = confusionMatrix(factor(pred_train), factor(train$V58))
 cm_lr_train
 ```
 The accuracy is 92.83% for the classification error of the Logistic Regression of train data.
 
 
 ```{r}
-cm_lr_test = confusionMatrix(as.factor(pred_test), as.factor(test$V58), positive = "1")
+cm_lr_test = confusionMatrix(factor(pred_test), factor(test$V58))
 cm_lr_test
 ```
 The accuracy is 92.7% for the classification error of the Logistic Regression of test data.
@@ -207,25 +203,25 @@ The accuracy is 92.7% for the classification error of the Logistic Regression of
 **Linear Regression on Standardized Train and Test Data**
 
 ```{r}
-lr_stan_train <- glm(V58 ~ ., data = stan_train, family = "binomial")
-summary(lr_stan_train)
+stan_train <- glm(V58 ~ ., data = stan_train, family = "binomial")
+summary(stan_train)
 ```
 The features: 4, 5, 7, 8, 9, 11, 16, 17, 19, 20, 21, 23, 25, 27, 42, 44, 45, 46, 47, 49, 52, 53, 55, 56, 57 are statistically significant 
 
 ```{r}
-pred_stdtrain <- (predict(lr_stan_train, train) > 0) * 1
-pred_stdtest <- (predict(lr_stan_train, test) > 0) * 1
+pred_stdtrain <- (predict(stan_train, train) > 0) * 1
+pred_stdtest <- (predict(stan_train, test) > 0) * 1
 ```
 
 ```{r}
-cm_lr_stan_train = confusionMatrix(as.factor(pred_stdtrain), as.factor(train$V58), positive = "1")
+cm_lr_stan_train = confusionMatrix(factor(pred_stdtrain), factor(train$V58))
 cm_lr_stan_train
 ```
 The accuracy is 54.16% for the classification error of the Logistic Regression of standardized train data.
 
 
 ```{r}
-cm_lr_stan_test = confusionMatrix(as.factor(pred_stdtest), as.factor(test$V58), positive = "1")
+cm_lr_stan_test = confusionMatrix(factor(pred_stdtest), factor(test$V58))
 cm_lr_stan_test
 ```
 The accuracy is 55.22% for the classification error of the Logistic Regression of standardized test data.
@@ -233,25 +229,25 @@ The accuracy is 55.22% for the classification error of the Logistic Regression o
 **Linear Regression on Log Transformation train and test data**
 
 ```{r}
-lr_log_train <- glm(V58 ~ ., data = log_train, family = "binomial")
-summary(lr_log_train)
+log_train <- glm(V58 ~ ., data = log_train, family = "binomial")
+summary(log_train)
 ```
 The features: 5, 7, 8, 11, 13, 16, 17, 20, 21, 23, 24, 25, 27, 28, 33, 35, 37, 42, 43, 45, 46, 49, 52, 53, 57 are statistically significant
 
 ```{r}
-pred_logtrain <- (predict(lr_log_train, train) > 0) * 1
-pred_logtest <- (predict(lr_log_train, test) > 0) * 1
+pred_logtrain <- (predict(log_train, train) > 0) * 1
+pred_logtest <- (predict(log_train, test) > 0) * 1
 ```
 
 ```{r}
-cm_lr_log_train = confusionMatrix(as.factor(pred_logtrain), as.factor(train$V58), positive = "1")
+cm_lr_log_train = confusionMatrix(factor(pred_logtrain), factor(train$V58))
 cm_lr_log_train
 ```
 The accuracy is 53.47% for the classification error of the Logistic Regression of log transformation of train data.
 
 
 ```{r}
-cm_lr_log_test = confusionMatrix(as.factor(pred_logtest), as.factor(test$V58), positive = "1")
+cm_lr_log_test = confusionMatrix(factor(pred_logtest), factor(test$V58))
 cm_lr_log_test
 ```
 The accuracy is 54.11% for the classification error of the Logistic Regression of log transformation of test data.
@@ -259,28 +255,27 @@ The accuracy is 54.11% for the classification error of the Logistic Regression o
 **Logistic Regression on Discretized train and test data**
 
 ```{r}
-lr_I_train <- glm(V58 ~ ., data = I_train, family = "binomial")
-summary(lr_I_train)
+I_train <- glm(V58 ~ ., data = I_train, family = "binomial")
+summary(I_train)
 ```
 
-The features: 5, 7, 8, 10, 11, 13, 14, 15, 16, 17, 18, 20, 21, 23, 24, 25, 27, 28, 37, 42, 43, 44, 45, 46, 48, 52, 53, 54 are statistically significant. Also have features 55, 56, 57 as NA in the summary function because these features are singularities, meaning that 
-their respective columns are either all 0s or all 1s so cannot get a p-value from it.
+The features: 5, 7, 8, 10, 11, 13, 14, 15, 16, 17, 18, 20, 21, 23, 24, 25, 27, 28, 37, 42, 43, 44, 45, 46, 48, 52, 53, 54 are statistically significant. Also have features 55, 56, 57 as NA in the summary function because these features are singularities.
 
 ```{r}
-pred_I_train <- (predict(lr_I_train, train) > 0) * 1
-pred_I_test <- (predict(lr_I_train, test) > 0) * 1
+pred_I_train <- (predict(I_train, train) > 0) * 1
+pred_I_test <- (predict(I_train, test) > 0) * 1
 ```
 
 ```{r}
-cm_lr_I_train = confusionMatrix(as.factor(pred_I_train), as.factor(train$V58), positive = "1")
+cm_lr_I_train = confusionMatrix(factor(pred_I_train), factor(train$V58))
 cm_lr_I_train
 ```
 
 The accuracy is 90.19% for the classification error of the Logistic Regression of discretize transformation of train data.
 
 ```{r}
-cm_lr_I_test = confusionMatrix(as.factor(pred_I_test), as.factor(test$V58), positive = "1")
-cm_lr_I_test
+I_test = confusionMatrix(factor(pred_I_test), factor(test$V58))
+I_test
 ```
 The accuracy is 89.7% for the classification error of the Logistic Regression of discretize transformation of test data.
 
@@ -326,13 +321,13 @@ lda_predict_test_stan <- predict(lda_train_stan, stan_test)$class
 ```
 
 ```{r}
-cm_lda_stan_test = confusionMatrix(as.factor(lda_predict_test_stan), as.factor(stan_test$V58), positive = "1")
+cm_lda_stan_test = confusionMatrix(factor(lda_predict_test_stan), factor(stan_test$V58))
 cm_lda_stan_test
 ```
 The accuracy is 89.7% for the classification error of the lda standardized test data.
 
 ```{r}
-cm_lda_stan_train = confusionMatrix(as.factor(lda_predict_train_stan), as.factor(stan_train$V58), positive = "1")
+cm_lda_stan_train = confusionMatrix(factor(lda_predict_train_stan), factor(stan_train$V58))
 cm_lda_stan_train
 ```
 The accuracy is 89.83% for the classification error of the lda standardized train data.
@@ -346,7 +341,7 @@ qda_predict_test_stan <- predict(qda_train_stan, stan_test)$class
 ```
 
 ```{r}
-cm_qda_stan_test = confusionMatrix(as.factor(qda_predict_test_stan), as.factor(stan_test$V58), positive = "1")
+cm_qda_stan_test = confusionMatrix(factor(qda_predict_test_stan), factor(stan_test$V58))
 cm_qda_stan_test
 ```
 
@@ -354,7 +349,7 @@ The accuracy is 82.53% for the classification error of the qda standardized test
 
 
 ```{r}
-cm_qda_stan_train = confusionMatrix(as.factor(qda_predict_train_stan), as.factor(stan_train$V58), positive = "1")
+cm_qda_stan_train = confusionMatrix(factor(qda_predict_train_stan), factor(stan_train$V58))
 cm_qda_stan_train
 ```
 
@@ -364,8 +359,8 @@ The accuracy is 82.13% for the classification error of the qda standardized trai
 **LDA for log transformation train and test data**
 
 ```{r}
-lda_train_log <- lda(V58 ~ ., data = log_train)
-qda_train_log <- qda(V58 ~ ., data = log_train)
+lda_train_log <- lda(data = log_train)
+qda_train_log <- qda(data = log_train)
 ```
 
 
@@ -376,7 +371,7 @@ lda_predict_test_log <- predict(lda_train_log, log_test)$class
 ```
 
 ```{r}
-cm_lda_log_test = confusionMatrix(as.factor(lda_predict_test_log), as.factor(log_test$V58), positive = "1")
+cm_lda_log_test = confusionMatrix(factor(lda_predict_test_log), factor(log_test$V58))
 cm_lda_log_test
 ```
 
@@ -386,7 +381,7 @@ The accuracy is 93.48% for the classification error of the lda log test data.
 
 
 ```{r}
-cm_lda_log_train = confusionMatrix(as.factor(lda_predict_train_log), as.factor(log_train$V58), positive = "1")
+cm_lda_log_train = confusionMatrix(factor(lda_predict_train_log), factor(log_train$V58))
 cm_lda_log_train
 ```
 The accuracy is 93.48% for the classification error of the lda log train data.
@@ -402,14 +397,14 @@ qda_predict_test_log <- predict(qda_train_log, log_test)$class
 ```
 
 ```{r}
-cm_qda_log_test = confusionMatrix(as.factor(qda_predict_test_log), as.factor(log_test$V58), positive = "1")
+cm_qda_log_test = confusionMatrix(factor(qda_predict_test_log), factor(log_test$V58))
 cm_qda_log_test
 ```
 
 The accuracy is 84.29% for the classification error of the qda log test data.
 
 ```{r}
-cm_qda_log_train = confusionMatrix(as.factor(qda_predict_train_log), as.factor(log_train$V58), positive = "1")
+cm_qda_log_train = confusionMatrix(factor(qda_predict_train_log), factor(log_train$V58))
 cm_qda_log_train
 ```
 The accuracy is 84.12% for the classification error of the qda log train data.
@@ -455,13 +450,13 @@ library(e1071)
 
 ```{r}
 new_train = train
-new_train$V58 = as.factor(new_train$V58)
+new_train$V58 = new_train$V58
 new_test = test
-new_test$V58 = as.factor(new_test$V58)
+new_test$V58 = new_test$V58
 ```
 
 ```{r}
-tune.linear = tune(svm, V58 ~ ., data = new_train, kernel = "linear", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10)), validation.x = new_test)
+tune.linear = tune(svm, data = new_train, kernel = "linear", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10)), validation.x = new_test)
 ```
 
 ```{r}
@@ -471,7 +466,7 @@ summary(tune.linear)
 
 
 ```{r}
-train_svm <- svm(V58 ~ ., kernel = "linear", data=new_train, cost=10)
+train_svm <- svm(kernel = "linear", data=new_train, cost=10)
 ```
 
 ```{r}
@@ -483,7 +478,7 @@ svm_predict_train <- predict(train_svm,new_train)
 ```
 
 ```{r}
-cm_linear_train <- confusionMatrix(as.factor(svm_predict_train), as.factor(new_train$V58), positive = "1")
+cm_linear_train <- confusionMatrix(factor(svm_predict_train), factor(new_train$V58))
 cm_linear_train
 ```
 The accuracy is 93.74% for the linear svm classifier of the train data.
@@ -493,7 +488,7 @@ svm_predict_test <- predict(train_svm,new_test)
 ```
 
 ```{r}
-cm_linear_test <- confusionMatrix(as.factor(svm_predict_test), as.factor(new_test$V58), positive = "1")
+cm_linear_test <- confusionMatrix(factor(svm_predict_test), factor(new_test$V58))
 cm_linear_test
 ```
 The accuracy is 93.42% for the linear svm classifier of the test data.
@@ -502,17 +497,17 @@ The accuracy is 93.42% for the linear svm classifier of the test data.
 
 ```{r}
 new_stan_train = stan_train
-new_stan_train$V58 = as.factor(new_stan_train$V58)
+new_stan_train$V58 = new_stan_train$V58
 ```
 
 
 ```{r}
 new_stan_test = stan_test
-new_stan_test$V58 = as.factor(new_stan_test$V58)
+new_stan_test$V58 = new_stan_test$V58
 ```
 
 ```{r}
-tune.linear = tune(svm, V58 ~ ., data = new_stan_train, kernel = "linear", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10)), validation.x = new_stan_test)
+tune.linear = tune(svm, data = new_stan_train, kernel = "linear", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10)), validation.x = new_stan_test)
 ```
 
 ```{r}
@@ -520,7 +515,7 @@ summary(tune.linear)
 ```
 
 ```{r}
-stan_train_svm <- svm(V58 ~ ., kernel = "linear", data=new_stan_train, cost=0.1)
+stan_train_svm <- svm(kernel = "linear", data=new_stan_train, cost=0.1)
 ```
 
 ```{r}
@@ -533,7 +528,7 @@ svm_predict_train_stan <- predict(stan_train_svm,new_stan_train)
 ```
 
 ```{r}
-cm_linear_stan_train <- confusionMatrix(as.factor(svm_predict_train_stan), as.factor(new_stan_train$V58), positive = "1")
+cm_linear_stan_train <- confusionMatrix(factor(svm_predict_train_stan), factor(new_stan_train$V58))
 cm_linear_stan_train
 ```
 
@@ -544,7 +539,7 @@ svm_predict_test_stan <- predict(stan_train_svm,new_stan_test)
 ```
 
 ```{r}
-cm_linear_stan_test <- confusionMatrix(as.factor(svm_predict_test_stan), as.factor(new_stan_test$V58), positive = "1")
+cm_linear_stan_test <- confusionMatrix(factor(svm_predict_test_stan), factor(new_stan_test$V58))
 cm_linear_stan_test
 ```
 
@@ -555,18 +550,18 @@ The accuracy is 93.22% for the linear svm classifier of the standardized test da
 
 ```{r}
 new_log_train = log_train
-new_log_train$V58 = as.factor(new_log_train$V58)
+new_log_train$V58 = new_log_train$V58
 ```
 
 
 ```{r}
 new_log_test = log_test
-new_log_test$V58 = as.factor(new_log_test$V58)
+new_log_test$V58 = new_log_test$V58
 ```
 
 
 ```{r}
-tune.linear = tune(svm, V58 ~ ., data = new_log_train, kernel = "linear", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10)), validation.x = new_log_test)
+tune.linear = tune(svm, data = new_log_train, kernel = "linear", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10)), validation.x = new_log_test)
 ```
 
 ```{r}
@@ -575,7 +570,7 @@ summary(tune.linear)
 
 
 ```{r}
-log_train_svm <- svm(V58 ~ ., kernel = "linear", data=new_log_train, cost=0.01)
+log_train_svm <- svm(kernel = "linear", data=new_log_train, cost=0.01)
 ```
 
 ```{r}
@@ -588,7 +583,7 @@ svm_predict_train_log <- predict(log_train_svm,new_log_train)
 ```
 
 ```{r}
-cm_linear_log_train <- confusionMatrix(as.factor(svm_predict_train_log), as.factor(new_log_train$V58), positive = "1")
+cm_linear_log_train <- confusionMatrix(factor(svm_predict_train_log), factor(new_log_train$V58))
 cm_linear_log_train
 ```
 
@@ -601,7 +596,7 @@ svm_predict_test_log <- predict(log_train_svm,new_log_test)
 ```
 
 ```{r}
-cm_linear_log_test <- confusionMatrix(as.factor(svm_predict_test_log), as.factor(new_log_test$V58), positive = "1")
+cm_linear_log_test <- confusionMatrix(factor(svm_predict_test_log), factor(new_log_test$V58))
 cm_linear_log_test
 ```
 
@@ -614,18 +609,18 @@ The linear svm accuracy for the log transformed test data is 94.20%.
 
 ```{r}
 new_I_train = I_train
-new_I_train$V58 = as.factor(new_I_train$V58)
+new_I_train$V58 = new_I_train$V58
 ```
 
 
 ```{r}
 new_I_test = I_test
-new_I_test$V58 = as.factor(new_I_test$V58)
+new_I_test$V58 = new_I_test$V58
 ```
 
 
 ```{r}
-tune.linear = tune(svm, V58 ~ ., data = new_I_train, kernel = "linear", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10)), validation.x = new_I_test)
+tune.linear = tune(svm, data = new_I_train, kernel = "linear", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10)), validation.x = new_I_test)
 ```
 
 
@@ -636,7 +631,7 @@ summary(tune.linear)
 
 
 ```{r}
-I_train_svm <- svm(V58 ~ ., kernel = "linear", data=new_I_train, cost=5)
+I_train_svm <- svm(kernel = "linear", data=new_I_train, cost=5)
 ```
 
 
@@ -651,7 +646,7 @@ svm_predict_train_I <- predict(I_train_svm,new_I_train)
 ```
 
 ```{r}
-cm_linear_I_train <- confusionMatrix(as.factor(svm_predict_train_I), as.factor(new_I_train$V58), positive = "1")
+cm_linear_I_train <- confusionMatrix(factor(svm_predict_train_I), factor(new_I_train$V58))
 cm_linear_I_train
 ```
 
@@ -663,7 +658,7 @@ svm_predict_test_I <- predict(I_train_svm,new_I_test)
 ```
 
 ```{r}
-cm_linear_I_test <- confusionMatrix(as.factor(svm_predict_test_I), as.factor(new_I_test$V58), positive = "1")
+cm_linear_I_test <- confusionMatrix(factor(svm_predict_test_I), factor(new_I_test$V58))
 cm_linear_I_test
 ```
 The linear SVM accuracy for the discretized test data is 92.44%.
@@ -672,7 +667,7 @@ The linear SVM accuracy for the discretized test data is 92.44%.
 **Gaussian SVM for original data**
 
 ```{r}
-tune.gaussian = tune(svm, V58 ~ ., data = new_train, kernel = "radial", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10),
+tune.gaussian = tune(svm, data = new_train, kernel = "radial", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10),
                                                                                       gamma = c(0.001, 0.01, 0.1, 1)), validation.x = new_test)
 ```
 
@@ -684,7 +679,7 @@ summary(tune.gaussian)
 
 
 ```{r}
-train_svm <- svm(V58 ~ ., kernel = "radial", data=new_train, cost=10, gamma =0.01)
+train_svm <- svm(kernel = "radial", data=new_train, cost=10, gamma =0.01)
 ```
 
 ```{r}
@@ -696,7 +691,7 @@ svm_predict_train <- predict(train_svm,new_train)
 ```
 
 ```{r}
-cm_gaussian_train <- confusionMatrix(as.factor(svm_predict_train), as.factor(new_train$V58), positive = "1")
+cm_gaussian_train <- confusionMatrix(factor(svm_predict_train), factor(new_train$V58))
 cm_gaussian_train
 ```
 The accuracy is 96.28% for the guassian svm classifier of the train data.
@@ -706,7 +701,7 @@ svm_predict_test <- predict(train_svm,new_test)
 ```
 
 ```{r}
-cm_gaussian_test <- confusionMatrix(as.factor(svm_predict_test), as.factor(new_test$V58), positive = "1")
+cm_gaussian_test <- confusionMatrix(factor(svm_predict_test), factor(new_test$V58))
 cm_gaussian_test
 ```
 The accuracy is 94.52% for the Guassian svm classifier of the test data.
@@ -715,7 +710,7 @@ The accuracy is 94.52% for the Guassian svm classifier of the test data.
 **Gaussian SVM for standardized data**
 
 ```{r}
-tune.gaussian = tune(svm, V58 ~ ., data = new_stan_train, kernel = "radial", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10),
+tune.gaussian = tune(svm, data = new_stan_train, kernel = "radial", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10),
                                                                                       gamma = c(0.001, 0.01, 0.1, 1)), validation.x = new_stan_test)
 ```
 
@@ -726,7 +721,7 @@ summary(tune.gaussian)
 
 
 ```{r}
-stan_train_svm <- svm(V58 ~ ., kernel = "radial", data=new_stan_train, cost=10, gamma = 0.01)
+stan_train_svm <- svm(kernel = "radial", data=new_stan_train, cost=10, gamma = 0.01)
 ```
 
 ```{r}
@@ -739,7 +734,7 @@ svm_predict_train_stan <- predict(stan_train_svm,new_stan_train)
 ```
 
 ```{r}
-cm_gaussian_stan_train <- confusionMatrix(as.factor(svm_predict_train_stan), as.factor(new_stan_train$V58), positive = "1")
+cm_gaussian_stan_train <- confusionMatrix(factor(svm_predict_train_stan), factor(new_stan_train$V58))
 cm_gaussian_stan_train
 ```
 
@@ -750,7 +745,7 @@ svm_predict_test_stan <- predict(stan_train_svm,new_stan_test)
 ```
 
 ```{r}
-cm_gaussian_stan_test <- confusionMatrix(as.factor(svm_predict_test_stan), as.factor(new_stan_test$V58), positive = "1")
+cm_gaussian_stan_test <- confusionMatrix(factor(svm_predict_test_stan), factor(new_stan_test$V58))
 cm_gaussian_stan_test
 ```
 
@@ -761,7 +756,7 @@ The accuracy is 94.13% for the gaussian svm classifier of the standardized test 
 
 
 ```{r}
-tune.gaussian = tune(svm, V58 ~ ., data = new_log_train, kernel = "radial", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10),
+tune.gaussian = tune(svm, data = new_log_train, kernel = "radial", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10),
                                                                                       gamma = c(0.001, 0.01, 0.1, 1)), validation.x = new_log_test)
 ```
 
@@ -772,7 +767,7 @@ summary(tune.gaussian)
 
 
 ```{r}
-log_train_svm <- svm(V58 ~ ., kernel = "radial", data=new_log_train, cost=10, gamma = 0.01)
+log_train_svm <- svm(kernel = "radial", data=new_log_train, cost=10, gamma = 0.01)
 ```
 
 ```{r}
@@ -785,7 +780,7 @@ svm_predict_train_log <- predict(log_train_svm,new_log_train)
 ```
 
 ```{r}
-cm_gaussian_log_train <- confusionMatrix(as.factor(svm_predict_train_log), as.factor(new_log_train$V58), positive = "1")
+cm_gaussian_log_train <- confusionMatrix(factor(svm_predict_train_log), factor(new_log_train$V58))
 cm_gaussian_log_train
 ```
 
@@ -796,7 +791,7 @@ svm_predict_test_log <- predict(log_train_svm,new_log_test)
 ```
 
 ```{r}
-cm_gaussian_log_test <- confusionMatrix(as.factor(svm_predict_test_log), as.factor(new_log_test$V58), positive = "1")
+cm_gaussian_log_test <- confusionMatrix(factor(svm_predict_test_log), factor(new_log_test$V58))
 cm_gaussian_log_test
 ```
 
@@ -807,7 +802,7 @@ The accuracy is 96.22% for the gaussian svm classifier of the log transform test
 
 
 ```{r}
-tune.gaussian = tune(svm, V58 ~ ., data = new_I_train, kernel = "radial", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10),
+tune.gaussian = tune(svm, data = new_I_train, kernel = "radial", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10),
                                                                                       gamma = c(0.001, 0.01, 0.1, 1)), validation.x = new_I_test)
 ```
 
@@ -818,7 +813,7 @@ summary(tune.gaussian)
 
 
 ```{r}
-I_train_svm <- svm(V58 ~ ., kernel = "radial", data=new_I_train, cost=10, gamma = 0.1)
+I_train_svm <- svm(kernel = "radial", data=new_I_train, cost=10, gamma = 0.1)
 ```
 
 ```{r}
@@ -831,7 +826,7 @@ svm_predict_train_I <- predict(I_train_svm,new_I_train)
 ```
 
 ```{r}
-cm_gaussian_I_train <- confusionMatrix(as.factor(svm_predict_train_I), as.factor(new_I_train$V58), positive = "1")
+cm_gaussian_I_train <- confusionMatrix(factor(svm_predict_train_I), factor(new_I_train$V58))
 cm_gaussian_I_train
 ```
 
@@ -842,7 +837,7 @@ svm_predict_test_I <- predict(I_train_svm,new_I_test)
 ```
 
 ```{r}
-cm_gaussian_I_test <- confusionMatrix(as.factor(svm_predict_test_I), as.factor(new_I_test$V58), positive = "1")
+cm_gaussian_I_test <- confusionMatrix(factor(svm_predict_test_I), factor(new_I_test$V58))
 cm_gaussian_I_test
 ```
 
@@ -851,7 +846,7 @@ The accuracy is 95.11% for the gaussian svm classifier of the discretized test d
 
 **Polynomial SVM for original data**
 ```{r}
-tune.polynomial = tune(svm, V58 ~ ., data = new_train, kernel = "polynomial", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10),
+tune.polynomial = tune(svm, data = new_train, kernel = "polynomial", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10),
                                                                                       degree = c(2, 3, 4, 5)), validation.x = new_test)
 ```
 
@@ -861,7 +856,7 @@ summary(tune.polynomial)
 
 
 ```{r}
-train_svm <- svm(V58 ~ ., kernel = "polynomial", data=new_train, cost=10, degree = 2)
+train_svm <- svm(kernel = "polynomial", data=new_train, cost=10, degree = 2)
 ```
 
 ```{r}
@@ -873,7 +868,7 @@ svm_predict_train <- predict(train_svm,new_train)
 ```
 
 ```{r}
-cm_poly_train <- confusionMatrix(as.factor(svm_predict_train), as.factor(new_train$V58), positive = "1")
+cm_poly_train <- confusionMatrix(factor(svm_predict_train), factor(new_train$V58))
 cm_poly_train
 ```
 The accuracy is 95.47% for the polynomial svm classifier of the train data.
@@ -883,7 +878,7 @@ svm_predict_test <- predict(train_svm,new_test)
 ```
 
 ```{r}
-cm_poly_test <- confusionMatrix(as.factor(svm_predict_test), as.factor(new_test$V58), positive = "1")
+cm_poly_test <- confusionMatrix(factor(svm_predict_test), factor(new_test$V58))
 cm_poly_test
 ```
 The accuracy is 92.24% for the polynomial svm classifier of the test data.
@@ -891,7 +886,7 @@ The accuracy is 92.24% for the polynomial svm classifier of the test data.
 **Polynomial SVM for standardized data**
 
 ```{r}
-tune.polynomial = tune(svm, V58 ~ ., data = new_stan_train, kernel = "polynomial", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10),
+tune.polynomial = tune(svm, data = new_stan_train, kernel = "polynomial", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10),
                                                                                       degree = c(2, 3, 4, 5)), validation.x = new_stan_test)
 ```
 
@@ -902,7 +897,7 @@ summary(tune.polynomial)
 
 
 ```{r}
-stan_train_svm <- svm(V58 ~ ., kernel = "polynomial", data=new_stan_train, cost=10, degree = 2)
+stan_train_svm <- svm(kernel = "polynomial", data=new_stan_train, cost=10, degree = 2)
 ```
 
 ```{r}
@@ -915,7 +910,7 @@ svm_predict_train_stan <- predict(stan_train_svm,new_stan_train)
 ```
 
 ```{r}
-cm_poly_stan_train <- confusionMatrix(as.factor(svm_predict_train_stan), as.factor(new_stan_train$V58), positive = "1")
+cm_poly_stan_train <- confusionMatrix(factor(svm_predict_train_stan), factor(new_stan_train$V58))
 cm_poly_stan_train
 ```
 
@@ -927,7 +922,7 @@ svm_predict_test_stan <- predict(stan_train_svm,new_stan_test)
 ```
 
 ```{r}
-cm_poly_stan_test <- confusionMatrix(as.factor(svm_predict_test_stan), as.factor(new_stan_test$V58), positive = "1")
+cm_poly_stan_test <- confusionMatrix(factor(svm_predict_test_stan), factor(new_stan_test$V58))
 cm_poly_stan_test
 ```
 
@@ -936,7 +931,7 @@ The accuracy is 92.05% for the polynomial svm classifier of the standardized tes
 
 **Polynomial SVM for the log transformed data**
 ```{r}
-tune.polynomial = tune(svm, V58 ~ ., data = new_log_train, kernel = "polynomial", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10),
+tune.polynomial = tune(svm, data = new_log_train, kernel = "polynomial", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10),
                                                                                       degree = c(2, 3, 4, 5)), validation.x = new_log_test)
 ```
 
@@ -948,7 +943,7 @@ summary(tune.polynomial)
 
 
 ```{r}
-log_train_svm <- svm(V58 ~ ., kernel = "polynomial", data=new_log_train, cost=10, degree = 2)
+log_train_svm <- svm(kernel = "polynomial", data=new_log_train, cost=10, degree = 2)
 ```
 
 ```{r}
@@ -961,7 +956,7 @@ svm_predict_train_log <- predict(log_train_svm,new_log_train)
 ```
 
 ```{r}
-cm_poly_log_train <- confusionMatrix(as.factor(svm_predict_train_log), as.factor(new_log_train$V58), positive = "1")
+cm_poly_log_train <- confusionMatrix(factor(svm_predict_train_log), factor(new_log_train$V58))
 cm_poly_log_train
 ```
 
@@ -972,7 +967,7 @@ svm_predict_test_log <- predict(log_train_svm,new_log_test)
 ```
 
 ```{r}
-cm_poly_log_test <- confusionMatrix(as.factor(svm_predict_test_log), as.factor(new_log_test$V58), positive = "1")
+cm_poly_log_test <- confusionMatrix(factor(svm_predict_test_log), factor(new_log_test$V58))
 cm_poly_log_test
 ```
 
@@ -983,7 +978,7 @@ The accuracy is 95.05% for the polynomial svm classifier of the log transformed 
 
 
 ```{r}
-tune.polynomial = tune(svm, V58 ~ ., data = new_I_train, kernel = "polynomial", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10),
+tune.polynomial = tune(svm, data = new_I_train, kernel = "polynomial", ranges = list(cost=c(0.001, 0.01, 0.1, 1, 5, 10),
                                                                                       degree = c(2, 3, 4, 5)), validation.x = new_I_test)
 ```
 
@@ -994,7 +989,7 @@ summary(tune.polynomial)
 
 
 ```{r}
-I_train_svm <- svm(V58 ~ ., kernel = "polynomial", data=new_I_train, cost=10, degree = 2)
+I_train_svm <- svm(kernel = "polynomial", data=new_I_train, cost=10, degree = 2)
 ```
 
 ```{r}
@@ -1007,7 +1002,7 @@ svm_predict_train_I <- predict(I_train_svm,new_I_train)
 ```
 
 ```{r}
-cm_poly_I_train <- confusionMatrix(as.factor(svm_predict_train_I), as.factor(new_I_train$V58), positive = "1")
+cm_poly_I_train <- confusionMatrix(factor(svm_predict_train_I), factor(new_I_train$V58))
 cm_poly_I_train
 ```
 
@@ -1018,7 +1013,7 @@ svm_predict_test_I <- predict(I_train_svm,new_I_test)
 ```
 
 ```{r}
-cm_poly_I_test <- confusionMatrix(as.factor(svm_predict_test_I), as.factor(new_I_test$V58), positive = "1")
+cm_poly_I_test <- confusionMatrix(factor(svm_predict_test_I), factor(new_I_test$V58))
 cm_poly_I_test
 ```
 
@@ -1096,13 +1091,11 @@ rownames(accuracy.lr.table) <- c("train", "test")
 accuracy.lr.table
 ```
 
-Note that in all the tables above (SVM, LDA and QDA, and Logistic Regression), the I stands for discretized.
-
 
 8)
 Used single method with properly chosen tuning parameter and a combination of several methods to design a classifier with test error rate as small as possible. 
 
-The log transformation Gaussian SVM classifier has the best test accuracy rate of 96.22% based on the table.
+The log transformation Gaussian SVM classifier has the best test accuracy.
 
 Combine PCA with the Gaussian SVM classisfier for the log transformed to get the smallest test error rate. 
 
@@ -1154,7 +1147,7 @@ Original Tune: Cost = 10, gamma = 0.01, accuracy = 96.22%
 20th Adjustment: Cost = 9.3,   gamma = 0.0162, accuracy = 96.22%
 
 
-Tuned 20 times to make the test error rate smaller. In conclusion, the optimal parameters for the gaussian classifier on the log transformation data is roughly: cost = 9.565, or cost = 9.575, or cost = 9.56, gamma = 0.017, or gamma = 0.0175 for an accuracy of 96.61%, an improvement of 0.4% compare to the original tuning parameter.
+Tuned 20 times to make the test error rate smaller. In conclusion, the optimal parameters for the gaussian classifier on the log transformation data is roughly: cost = 9.565, or cost = 9.575, or cost = 9.56, gamma = 0.017, or gamma = 0.0175.
 
 ```{r}
 tune.gaussian = tune(svm, V58 ~ ., data = new_log_train, kernel = "radial", ranges = list(cost=c(9.3, 9.31, 9.32, 9.33, 9.34), gamma = c(0.0162, 0.0163, 0.0164, 0.0165, 0.0166)), validation.x = new_log_test )
@@ -1170,6 +1163,6 @@ svm_predict_test_log <- predict(log_train_svm,new_log_test)
 ```
 
 ```{r}
-cm_gaussian_log_test <- confusionMatrix(as.factor(svm_predict_test_log), as.factor(new_log_test$V58), positive = "1")
+cm_gaussian_log_test <- confusionMatrix(factor(svm_predict_test_log), factor(new_log_test$V58))
 cm_gaussian_log_test
 ```
